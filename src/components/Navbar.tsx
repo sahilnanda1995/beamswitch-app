@@ -1,11 +1,18 @@
 "use client";
-import { useConnect } from "wagmi";
-import { Fragment } from "react";
+import { useAccount, useConnect } from "wagmi";
+import { Fragment, useEffect, useState } from "react";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { PlusIcon } from "@heroicons/react/20/solid";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import ConnectWalletMenuButton from "./ConnectWalletMenuButton";
+import Image from "next/image";
+import { useAtom } from "jotai";
+import {
+  substrateWalletConnectedAtom,
+  substrateAccountsAtom,
+  substrateSelectedAccountAtom,
+} from "@/atoms";
 
 const user = {
   name: "Tom Cook",
@@ -30,9 +37,19 @@ function classNames(...classes: string[]) {
 }
 
 export default function NavBar() {
-  const { connect } = useConnect({
-    connector: new InjectedConnector(),
-  });
+  const [hasMounted, setHasMounted] = useState(false);
+  const [substrateWalletConnected] = useAtom(substrateWalletConnectedAtom);
+  const [substrateAccounts] = useAtom(substrateAccountsAtom);
+  const [substrateSelectedAccount] = useAtom(substrateSelectedAccountAtom);
+
+  //   const {  } = useConnect();
+  const { address, connector: isConnected } = useAccount();
+
+  useEffect(() => setHasMounted(true), []);
+
+  if (!hasMounted) {
+    return null;
+  }
   return (
     <Disclosure as="nav" className="bg-gray-800">
       {({ open }) => (
@@ -76,20 +93,44 @@ export default function NavBar() {
                   ))}
                 </div>
               </div>
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  {/* <button
-                    onClick={() => {
-                      connect();
-                    }}
-                    type="button"
-                    className="relative inline-flex items-center gap-x-1.5 rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
-                  >
-                    <PlusIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
-                    Connect Wallet
-                  </button> */}
-                  <ConnectWalletMenuButton />
-                </div>
+              <div className="flex items-center space-x-2">
+                {isConnected && address && (
+                  <button className="relative inline-flex items-center gap-x-1.5 rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+                    <div className="flex justify-center h-4 w-4">
+                      <Image
+                        src="/eth_token.png"
+                        alt="eth symbol"
+                        height={30}
+                        width={20}
+                      />
+                    </div>
+                    {address.toString().slice(0, 4) +
+                      "..." +
+                      address.toString().slice(-4)}
+                  </button>
+                )}
+                {substrateAccounts &&
+                  substrateAccounts.length > 0 &&
+                  substrateSelectedAccount !== "" && (
+                    <button className="relative inline-flex items-center gap-x-1.5 rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+                      <div className="flex justify-center h-4 w-4">
+                        <Image
+                          src="/polkadot_token.png"
+                          alt="dot symbol"
+                          height={32}
+                          width={32}
+                        />
+                      </div>
+                      {substrateSelectedAccount.slice(0, 4) +
+                        "..." +
+                        substrateSelectedAccount.slice(-4)}
+                    </button>
+                  )}
+                {(!address || substrateSelectedAccount.length == 0) && (
+                  <div className="flex-shrink-0">
+                    <ConnectWalletMenuButton />
+                  </div>
+                )}
                 {/* <div className="hidden md:ml-4 md:flex md:flex-shrink-0 md:items-center">
                   <button
                     type="button"

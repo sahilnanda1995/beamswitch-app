@@ -1,14 +1,48 @@
 "use client";
 import { Menu, Transition } from "@headlessui/react";
+import {
+  web3Accounts,
+  web3Enable,
+  web3FromAddress,
+} from "@polkadot/extension-dapp";
 import { Fragment, JSX, SVGProps, useEffect, useRef, useState } from "react";
 import { ChevronDownIcon, PlusIcon } from "@heroicons/react/20/solid";
 import { useConnect } from "wagmi";
 import { InjectedConnector } from "wagmi/connectors/injected";
+import Image from "next/image";
+import { useAtom } from "jotai";
+import {
+  substrateWalletConnectedAtom,
+  substrateAccountsAtom,
+  substrateSelectedAccountAtom,
+} from "@/atoms";
 
 export default function ConnectWalletMenuButton() {
+  const [, setSubstrateWalletConnected] = useAtom(substrateWalletConnectedAtom);
+  const [, setSubstrateAccounts] = useAtom(substrateAccountsAtom);
+  const [, setSubstrateSelectedAccount] = useAtom(substrateSelectedAccountAtom);
   const { connect } = useConnect({
     connector: new InjectedConnector(),
   });
+
+  //   const allInjected = await web3Enable("beamswitch");
+  const connectSubWallet = async () => {
+    const allInjected = await web3Enable("beamswitch");
+    console.log("all injected");
+    console.log(allInjected);
+    const allAccounts = await web3Accounts();
+    if (allAccounts.length > 0) {
+      setSubstrateWalletConnected(true);
+      setSubstrateAccounts(allAccounts);
+      setSubstrateSelectedAccount(allAccounts[0].address.toString());
+      console.log(allAccounts[0].address.toString());
+    } else {
+      setSubstrateWalletConnected(false);
+      setSubstrateAccounts([]);
+      setSubstrateSelectedAccount("");
+    }
+  };
+
   return (
     <Menu as="div" className="relative inline-block text-left">
       <div>
@@ -36,17 +70,14 @@ export default function ConnectWalletMenuButton() {
                     active ? "bg-violet-500 text-white" : "text-gray-900"
                   } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
                 >
-                  {active ? (
-                    <EditActiveIcon
-                      className="mr-2 h-5 w-5"
-                      aria-hidden="true"
+                  <div className="flex justify-center h-8 w-8">
+                    <Image
+                      src="/eth_token.png"
+                      alt="eth symbol"
+                      height={30}
+                      width={20}
                     />
-                  ) : (
-                    <EditInactiveIcon
-                      className="mr-2 h-5 w-5"
-                      aria-hidden="true"
-                    />
-                  )}
+                  </div>
                   EVM Wallet
                 </button>
               )}
@@ -54,21 +85,19 @@ export default function ConnectWalletMenuButton() {
             <Menu.Item>
               {({ active }) => (
                 <button
+                  onClick={() => connectSubWallet()}
                   className={`${
                     active ? "bg-violet-500 text-white" : "text-gray-900"
                   } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
                 >
-                  {active ? (
-                    <DuplicateActiveIcon
-                      className="mr-2 h-5 w-5"
-                      aria-hidden="true"
+                  <div className="h-8 w-8">
+                    <Image
+                      src="/polkadot_token.png"
+                      alt="dot symbol"
+                      height={32}
+                      width={32}
                     />
-                  ) : (
-                    <DuplicateInactiveIcon
-                      className="mr-2 h-5 w-5"
-                      aria-hidden="true"
-                    />
-                  )}
+                  </div>
                   Substrate Wallet
                 </button>
               )}
