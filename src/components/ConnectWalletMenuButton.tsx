@@ -1,10 +1,6 @@
 "use client";
 import { Menu, Transition } from "@headlessui/react";
-import {
-  web3Accounts,
-  web3Enable,
-  web3FromAddress,
-} from "@polkadot/extension-dapp";
+
 import { Fragment, JSX, SVGProps, useEffect, useRef, useState } from "react";
 import { ChevronDownIcon, PlusIcon } from "@heroicons/react/20/solid";
 import { useConnect } from "wagmi";
@@ -16,6 +12,7 @@ import {
   substrateAccountsAtom,
   substrateSelectedAccountAtom,
 } from "@/atoms";
+import { cryptoWaitReady } from "@polkadot/util-crypto";
 
 export default function ConnectWalletMenuButton() {
   const [, setSubstrateWalletConnected] = useAtom(substrateWalletConnectedAtom);
@@ -27,20 +24,23 @@ export default function ConnectWalletMenuButton() {
 
   //   const allInjected = await web3Enable("beamswitch");
   const connectSubWallet = async () => {
-    const allInjected = await web3Enable("beamswitch");
-    console.log("all injected");
-    console.log(allInjected);
-    const allAccounts = await web3Accounts();
-    if (allAccounts.length > 0) {
-      setSubstrateWalletConnected(true);
-      setSubstrateAccounts(allAccounts);
-      setSubstrateSelectedAccount(allAccounts[0]);
-      console.log(allAccounts[0]);
-    } else {
-      setSubstrateWalletConnected(false);
-      setSubstrateAccounts([]);
-      setSubstrateSelectedAccount(null);
-    }
+    await cryptoWaitReady();
+    import("@polkadot/extension-dapp").then(async (ed) => {
+      const allInjected = await ed.web3Enable("beamswitch");
+      console.log("all injected");
+      console.log(allInjected);
+      const allAccounts = await ed.web3Accounts();
+      if (allAccounts.length > 0) {
+        setSubstrateWalletConnected(true);
+        setSubstrateAccounts(allAccounts);
+        setSubstrateSelectedAccount(allAccounts[0]);
+        console.log(allAccounts[0]);
+      } else {
+        setSubstrateWalletConnected(false);
+        setSubstrateAccounts([]);
+        setSubstrateSelectedAccount(null);
+      }
+    });
   };
 
   return (

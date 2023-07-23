@@ -15,11 +15,7 @@ import {
 } from "@moonbeam-network/xcm-types";
 import ListBoxNetwork from "@/components/ListBoxNetwork";
 import ListBoxToken from "@/components/ListBoxToken";
-import {
-  web3Accounts,
-  web3Enable,
-  web3FromSource,
-} from "@polkadot/extension-dapp";
+
 import { useAtom } from "jotai";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -33,7 +29,11 @@ import {
 } from "wagmi";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import { ethers } from "ethers";
-import { decodeAddress, encodeAddress } from "@polkadot/util-crypto";
+import {
+  cryptoWaitReady,
+  decodeAddress,
+  encodeAddress,
+} from "@polkadot/util-crypto";
 import { InjectedExtension } from "@polkadot/extension-inject/types";
 
 const defaultAsset: Asset = {
@@ -175,20 +175,23 @@ export default function Home() {
 
   //   const allInjected = await web3Enable("beamswitch");
   const connectSubWallet = async () => {
-    const allInjected = await web3Enable("beamswitch");
-    // console.log("all injected");
-    // console.log(allInjected);
-    const allAccounts = await web3Accounts();
-    if (allAccounts.length > 0) {
-      setSubstrateWalletConnected(true);
-      setSubstrateAccounts(allAccounts);
-      setSubstrateSelectedAccount(allAccounts[0]);
-      // console.log(allAccounts[0].address.toString());
-    } else {
-      setSubstrateWalletConnected(false);
-      setSubstrateAccounts([]);
-      setSubstrateSelectedAccount(null);
-    }
+    import("@polkadot/extension-dapp").then(async (ed) => {
+      await cryptoWaitReady();
+      const allInjected = await ed.web3Enable("beamswitch");
+      // console.log("all injected");
+      // console.log(allInjected);
+      const allAccounts = await ed.web3Accounts();
+      if (allAccounts.length > 0) {
+        setSubstrateWalletConnected(true);
+        setSubstrateAccounts(allAccounts);
+        setSubstrateSelectedAccount(allAccounts[0]);
+        // console.log(allAccounts[0].address.toString());
+      } else {
+        setSubstrateWalletConnected(false);
+        setSubstrateAccounts([]);
+        setSubstrateSelectedAccount(null);
+      }
+    });
   };
 
   const handleOnClick = async () => {};
@@ -231,10 +234,13 @@ export default function Home() {
       if (!substrateSelectedAccount?.address) {
         throw new Error("No account selected");
       }
-      const injector = await web3FromSource(
-        substrateSelectedAccount.meta.source
-      );
-      setSubstrateInjector(injector);
+      await cryptoWaitReady();
+      import("@polkadot/extension-dapp").then(async (ed) => {
+        const injector = await ed.web3FromSource(
+          substrateSelectedAccount.meta.source
+        );
+        setSubstrateInjector(injector);
+      });
     }
     if (substrateSelectedAccount) {
       subSigner();
