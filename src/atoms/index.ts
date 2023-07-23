@@ -8,4 +8,5 @@ export const substrateWalletConnectedAtom = atom<boolean>(false);
 
 export const substrateAccountsAtom = atom<InjectedAccountWithMeta[] | null>([]);
 
-export const substrateSelectedAccountAtom = atom<string | "">("");
+export const substrateSelectedAccountAtom =
+  atom<InjectedAccountWithMeta | null>(null);

@@ -111,7 +111,7 @@ export default function NavBar() {
                 )}
                 {substrateAccounts &&
                   substrateAccounts.length > 0 &&
-                  substrateSelectedAccount !== "" && (
+                  substrateSelectedAccount !== null && (
                     <button className="relative inline-flex items-center gap-x-1.5 rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
                       <div className="flex justify-center h-4 w-4">
                         <Image
@@ -121,12 +121,12 @@ export default function NavBar() {
                           width={32}
                         />
                       </div>
-                      {substrateSelectedAccount.slice(0, 4) +
+                      {substrateSelectedAccount?.address.slice(0, 4) +
                         "..." +
-                        substrateSelectedAccount.slice(-4)}
+                        substrateSelectedAccount?.address.slice(-4)}
                     </button>
                   )}
-                {(!address || substrateSelectedAccount.length == 0) && (
+                {(!address || !substrateSelectedAccount) && (
                   <div className="flex-shrink-0">
                     <ConnectWalletMenuButton />
                   </div>

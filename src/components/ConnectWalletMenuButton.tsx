@@ -34,12 +34,12 @@ export default function ConnectWalletMenuButton() {
     if (allAccounts.length > 0) {
       setSubstrateWalletConnected(true);
       setSubstrateAccounts(allAccounts);
-      setSubstrateSelectedAccount(allAccounts[0].address.toString());
-      console.log(allAccounts[0].address.toString());
+      setSubstrateSelectedAccount(allAccounts[0]);
+      console.log(allAccounts[0]);
     } else {
       setSubstrateWalletConnected(false);
       setSubstrateAccounts([]);
-      setSubstrateSelectedAccount("");
+      setSubstrateSelectedAccount(null);
     }
   };
 
