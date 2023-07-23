@@ -216,7 +216,7 @@ export default function Home() {
 
   useEffect(() => {
     async function ethSigner() {
-      const provider = new ethers.BrowserProvider(window.ethereum);
+      const provider = new ethers.BrowserProvider(window?.ethereum);
       const signer = await provider.getSigner();
       setEthersSigner(signer as any);
     }
